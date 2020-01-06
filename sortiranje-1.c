@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
+int static br=0;
 typedef struct datum
 {
 	int dan, mjesec, godina;
@@ -15,6 +16,32 @@ typedef struct dogadjaj
 	DATUM d;
 	VRIJEME v;
 } DOGADJAJ;
+DOGADJAJ* citaj(){
+    int n = 5;
+    int i = 0;
+
+    DOGADJAJ* niz = (DOGADJAJ*)calloc(n,sizeof(DOGADJAJ));
+    DOGADJAJ tmp;
+
+    FILE* file = fopen("dodaj_dogadjaj.txt", "r");
+    if(file == NULL)
+    {
+        printf("Datoteka se nije otvorila");
+        return NULL;
+    }
+
+    while(fscanf(file,"%s\n%[^\0]s%[^\0]s%[^\0]s%d.%d.%d.%d:%d", tmp.kategorija,tmp.naziv,tmp.opis,tmp.lokacija,&tmp.d.dan,&tmp.d.mjesec,&tmp.d.godina,&tmp.v.h,&tmp.v.min) != -1){
+        if(i == n){
+            niz = (DOGADJAJ*)realloc(niz,(n*=2)*sizeof(DOGADJAJ));
+        }
+        niz[i++]=tmp;
+        br++;
+         printf("%s\n%s %s %s\n %d.%d.%d.\n %d:%dh\n", tmp.kategorija,tmp.naziv,tmp.opis,tmp.lokacija,tmp.d.dan,tmp.d.mjesec,tmp.d.godina,tmp.v.h,tmp.v.min);
+    }
+    fclose(file);
+    return niz;
+
+}
 int cmp_string(const void* a, const void* b)
 {
 	return strcmp(*(char**)a, *(char**)b);
@@ -58,29 +85,13 @@ int split1(DOGADJAJ *niz, int begin, int end) {
   niz[j] = pivot;
   return j;
 }
-void quick_sort1(DOGADJAJ *niz,int begin, int end) {
+void quick_sort1(DOGADJAJ *niz,int begin, int end)
+ {
   if (begin < end) {
     int pivot = split1(niz, begin, end);
     quick_sort(niz, begin, pivot - 1);
     quick_sort(niz, pivot + 1, end);
   }
-}
-void dodaj(DOGADJAJ *d, FILE* fp)
-{
-	printf("\nUnesite podatke o novom dogadjaju:\n");
-	printf("   Kategorija: "); scanf(" %[^\n]s", d->kategorija);
-	//dodaj_kategoriju();
-	printf("   Naziv dogadjaja: "); scanf(" %[^\n]s", d->naziv);
-	printf("   Opis: "); scanf(" %[^\n]s", d->opis);
-	printf("   Lokacija: "); scanf(" %[^\n]s", d->lokacija);
-	printf("   Datum: "); scanf("%d.%d.%d.", &d->d.dan, &d->d.mjesec, &d->d.godina);
-	printf("   Vrijeme: "); scanf("%d.%d", &d->v.h, &d->v.min);
-	if ((fp = fopen("dodaj_dogadjaj.txt", "a")) != EOF)
-	{
-		fprintf(fp, "\nKategorija: %s\n  Naziv dogadjaja: %s\n  Opis: %s\n  Lokacija: %s\n  Datum: %02d.%02d.%02d.\n  Vrijeme: %02d:%02dh\n",
-			d->kategorija, d->naziv, d->opis, d->lokacija, d->d.dan, d->d.mjesec, d->d.godina, d->v.h, d->v.min);
-		fclose(fp);
-	}
 }
 void sortiranje2(DOGADJAJ *niz)
 {
@@ -99,47 +110,30 @@ void sortiranje2(DOGADJAJ *niz)
 }
 int main()
 {
-	int n;
-	DOGADJAJ *niz;
-	FILE *fp;
-	do
-    {
-        printf("Unesite broj dogadaja:\n");
-        scanf("%d",&n);
-    }
-    while(n<1);
-    niz=(DOGADJAJ*)malloc(n*sizeof(DOGADJAJ));
-    int i;
-    for(i=0;i<n;i++)
-    {
-        printf("Podaci o %d. dogadaju:\n",i+1);
-        dodaj(niz+i,fp);
-    }
-    int m;
-    do
+  DOGADJAJ *niz=citaj();
+  int redni_broj;
+  do
    {
     printf("\nUnesite redni broj po kom kriterijumu zelite sortirati dogadaje:\n");
     printf("1.Sortiranje dogadaja po lokaciji:\n");
     printf("2.Sortiranje po kriterijumu:\n");
     printf("3.Sortiranje po datumu:\n");
     printf("0.Izlaz\n");
-    scanf("%d",&m);
+    scanf("%d",&redni_broj);
    }
-   while(m<1);
-   if(m==1)
-   {
-       printf("\nSortiranje po lokaciji:\n");
-       quick_sort(niz,0,n);
-   }
-   if(m==2)
-   {
-       printf("\nSortiranje po kriterijumu:\n");
-       quick_sort1(niz,0,n);
-   }
-   if(m==3)
-   {
-       printf("\nSoritranje po datumu:\n");
-       sortiranje2(niz);
-   }
-    return 0;
+   while(redni_broj<1);
+   niz=citaj();
+  if(redni_broj==1)
+  {
+     quick_sort(niz,0,br);
+  }
+  else if(redni_broj==2)
+  {
+      quick_sort1(niz,0,br);
+  }
+  else if(redni_broj==3)
+  {
+      sortiranje2(niz);
+  }
+  return 0;
 }
